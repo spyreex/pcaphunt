@@ -1,3 +1,4 @@
-   *.pcap
-   *.pcapng
-   __pycache__/
+*.pcap
+*.pcapng
+__pycache__/
+!test_*.pcap
