@@ -1,5 +1,5 @@
 from collections import Counter, defaultdict                               
-from scapy.all import rdpcap, IP, TCP, UDP, ICMP, ARP, DNS, Raw
+from scapy.all import rdpcap, IP, TCP, UDP, ICMP, ARP, DNS, DNSQR, Raw
 
 filename = "capture3.pcap"
 packets = rdpcap(filename)
@@ -93,3 +93,27 @@ for packet in packets:
 
 if not found:
     print("No cleartext credentials detected.")
+
+MAX_NAME_LENGTH = 60
+MAX_LABEL_LENGTH = 30
+
+print()
+print("Suspicious DNS check:")
+reported = set()
+for packet in packets:
+    if DNSQR in packet:
+        name = packet[DNSQR].qname.decode(errors="ignore").rstrip(".")
+        if name in reported:
+            continue
+
+        longest_label = 0
+        for label in name.split("."):
+            if len(label) > longest_label:
+                longest_label = len(label)
+
+        if len(name) > MAX_NAME_LENGTH or longest_label > MAX_LABEL_LENGTH:
+            print(f"[ALERT] Suspicious DNS query: {name} (length {len(name)}, longest part {longest_label})")
+            reported.add(name)
+
+if not reported:
+    print("No suspicious DNS detected.")
