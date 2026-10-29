@@ -2,3 +2,4 @@
 *.pcapng
 __pycache__/
 !test_*.pcap
+report*.json
